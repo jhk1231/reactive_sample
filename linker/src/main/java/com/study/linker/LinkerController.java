@@ -1,6 +1,7 @@
 package com.study.linker;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 @RequestMapping
 @RestController
+@Slf4j
 public class LinkerController {
 
     private static final String URL = "http://localhost:1111";
@@ -31,15 +33,21 @@ public class LinkerController {
     @PostMapping("/link")
     public Mono<ResponseEntity<Map<String, Object>>>
     getMerge(@RequestBody BodyItem body) {
-        Map<String, Object> result = new HashMap<>();
 
-        Flux<String> messageFlux = Flux.fromIterable(body.getMessages());
-        Flux<Mono<String>> responseFlux = messageFlux.map(item -> linkerService.getEco(item));
-        Mono<List<String>> data = Flux.merge(responseFlux).collectList();
+        log.info("Request to get-message. [messages:{}]", body.getMessages());
 
+        final Flux<String> messageFlux = Flux.fromIterable(body.getMessages());
+        final Mono<List<String>> data = linkerService.getEco(messageFlux);
+        final Mono<ResponseEntity<Map<String, Object>>> responseDto = createResponseDto(data);
+
+        return responseDto;
+    }
+
+    private Mono<ResponseEntity<Map<String, Object>>> createResponseDto(Mono<List<String>> data) {
         return data.map(item -> {
-            System.out.println("item" + item.toString());
+            Map<String, Object> result = new HashMap<>();
             result.put("result", item);
+            log.info("Response to get-message. [messages:{}]", item);
             return ResponseEntity.ok(result);
         });
     }

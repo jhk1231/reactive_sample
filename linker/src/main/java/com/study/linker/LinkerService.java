@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -20,19 +21,14 @@ import java.util.Map;
 @Service
 public class LinkerService {
 
-    private final WebClient webClient;
+    private final EcoClientService ecoClientService;
 
-    public LinkerService(WebClient webClient) {
-        this.webClient = webClient;
+    public LinkerService(EcoClientService ecoClientService) {
+        this.ecoClientService = ecoClientService;
     }
 
-
-    Mono<String> getEco(String message) {
-        return webClient.get()
-                .uri("/eco?msg=" + message)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .toEntity(String.class)
-                .flatMap(entity -> Mono.just(entity.getBody()));
+    Mono<List<String>> getEco(Flux<String> messages) {
+        Flux<Mono<String>> responseFlux = messages.map(message -> ecoClientService.getEcoMessage(message));
+        return Flux.merge(responseFlux).collectList();
     }
 }

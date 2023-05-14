@@ -3,3 +3,8 @@ server:
   tomcat:
     threads:
       max: 1
+
+spring:
+  output:
+    ansi:
+      enabled: ALWAYS
