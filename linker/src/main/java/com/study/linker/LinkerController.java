@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -21,26 +22,26 @@ public class LinkerController {
     private static final String URL = "http://localhost:1111";
     private static Map<String, Object> rxMap = new HashMap<>();
 
+    private final LinkerService linkerService;
+
+    public LinkerController(LinkerService linkerService) {
+        this.linkerService = linkerService;
+    }
 
     @PostMapping("/link")
-    public ResponseEntity<Map<String, Object>>
+    public Mono<ResponseEntity<Map<String, Object>>>
     getMerge(@RequestBody BodyItem body) {
-
-        Mono<ResponseEntity<String>> mono = WebClient.create().get()
-                .uri(
-                        "http://localhost:1111/eco?msg=hi"
-                )
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .toEntity(String.class);
-
-        mono.subscribe(item -> saveItem(item.getBody(), body.getUser()));
-
-
         Map<String, Object> result = new HashMap<>();
-//        result.put("result", List.of(resultString.getBody()));
 
-        return ResponseEntity.ok(result);
+        Flux<String> messageFlux = Flux.fromIterable(body.getMessages());
+        Flux<Mono<String>> responseFlux = messageFlux.map(item -> linkerService.getEco(item));
+        Mono<List<String>> data = Flux.merge(responseFlux).collectList();
+
+        return data.map(item -> {
+            System.out.println("item" + item.toString());
+            result.put("result", item);
+            return ResponseEntity.ok(result);
+        });
     }
 
     static void saveItem(String item, String user) {
@@ -51,21 +52,10 @@ public class LinkerController {
 
     static class BodyItem {
 
-        @JsonProperty("user")
-        private String user;
-
         @JsonProperty("messages")
         private List<String> messages;
 
         public BodyItem() {
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        public void setUser(String user) {
-            this.user = user;
         }
 
         public List<String> getMessages() {
