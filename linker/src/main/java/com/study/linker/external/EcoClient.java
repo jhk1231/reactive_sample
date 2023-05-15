@@ -1,4 +1,4 @@
-package com.study.linker;
+package com.study.linker.external;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +25,4 @@ public class EcoClient {
                 .retrieve()
                 .toEntity(String.class);
     }
-
-//    Mono<ResponseEntity<String>> getEcoMessage(String message) {
-//        return webClient.get()
-//                .uri("/eco?msg=" + message)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .toEntity(String.class);
-//    }
 }

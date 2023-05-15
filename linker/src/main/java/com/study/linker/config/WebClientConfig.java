@@ -1,4 +1,4 @@
-package com.study.linker;
+package com.study.linker.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

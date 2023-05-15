@@ -1,14 +1,13 @@
-package com.study.linker;
+package com.study.linker.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.study.linker.service.LinkerService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,9 +19,6 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class LinkerController {
-
-    private static final String URL = "http://localhost:1111";
-    private static Map<String, Object> rxMap = new HashMap<>();
 
     private final LinkerService linkerService;
 
@@ -50,12 +46,6 @@ public class LinkerController {
             log.info("Response to get-message. [messages:{}]", item);
             return ResponseEntity.ok(result);
         });
-    }
-
-    static void saveItem(String item, String user) {
-        List<String> list = (List<String>) rxMap.get(user);
-        list.add(item);
-        rxMap.put(user, list);
     }
 
     static class BodyItem {

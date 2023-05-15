@@ -1,4 +1,4 @@
-package com.study.linker;
+package com.study.linker.external;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ public class EcoClientService {
         this.ecoClient = ecoClient;
     }
 
-    Mono<String> getEcoMessage(String message) {
+    public Mono<String> getEcoMessage(String message) {
         return ecoClient.getEcoMessage(message)
                 .map(data -> {
                     validataionEcoMessage(data);
